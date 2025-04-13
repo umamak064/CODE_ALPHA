@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My To-Do List ✨</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-image: url("to-do.png");
+      background-size: cover;        
+      background-repeat: no-repeat;  
+      background-position: center;   
+      background-attachment: fixed;  
+      display: flex;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .container {
+      background:rgb(89, 151, 163);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #ffffffec;
+      margin-bottom: 20px;
+    }
+
+    .input-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .input-section input,
+    .input-section select {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    .input-section button {
+      background: #40a556;
+      color: rgb(0, 0, 0);
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .input-section button:hover {
+      background: #43a047;
+    }
+
+    .filters {
+      margin: 20px 0 10px;
+      text-align: center;
+    }
+
+    .filters button {
+      margin: 0 5px;
+      background: #e0e0e0;
+      border: none;
+      padding: 7px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .filters button.active,
+    .filters button:hover {
+      background: #4caf50;
+      color: white;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 10px;
+    }
+
+    li {
+      background: #fafafa;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s ease;
+      border-left: 5px solid #ccc;
+    }
+
+    li.low { border-left-color: #81c784; }
+    li.medium { border-left-color: #ffb74d; }
+    li.high { border-left-color: #e57373; }
+
+    li.completed {
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+
+    .task-info {
+      flex: 1;
+      padding-right: 10px;
+    }
+
+    .task-meta {
+      font-size: 12px;
+      color: gray;
+    }
+
+    .delete-btn {
+      background: transparent;
+      border: none;
+      font-size: 18px;
+      color: #e53935;
+      cursor: pointer;
+    }
+
+    .clear-btn {
+      background: #f44336;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-top: 15px;
+      width: 100%;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .clear-btn:hover {
+      background: #d32f2f;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📝 My To-Do List</h1>
+
+    <div class="input-section">
+      <input type="text" id="taskInput" placeholder="Enter your task"/>
+      <input type="date" id="dueDate"/>
+      <select id="priority">
+        <option value="low">Low Priority</option>
+        <option value="medium">Medium Priority</option>
+        <option value="high">High Priority</option>
+      </select>
+      <button onclick="addTask()">Add Task</button>
+    </div>
+
+    <div class="filters">
+      <button onclick="filterTasks('all')" class="active">All</button>
+      <button onclick="filterTasks('pending')">Pending</button>
+      <button onclick="filterTasks('completed')">Completed</button>
+    </div>
+
+    <ul id="taskList"></ul>
+
+    <button class="clear-btn" onclick="clearAll()">Clear All Tasks</button>
+  </div>
+
+  <script>
+    let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+    let filter = 'all';
+
+    function addTask() {
+      const input = document.getElementById("taskInput");
+      const date = document.getElementById("dueDate").value;
+      const priority = document.getElementById("priority").value;
+
+      if (input.value.trim() === "") return;
+
+      const newTask = {
+        id: Date.now(),
+        text: input.value,
+        completed: false,
+        due: date,
+        priority: priority
+      };
+
+      tasks.push(newTask);
+      saveTasks();
+      input.value = "";
+      document.getElementById("dueDate").value = "";
+      renderTasks();
+    }
+
+    function renderTasks() {
+      const list = document.getElementById("taskList");
+      list.innerHTML = "";
+
+      let filtered = tasks;
+      if (filter === "completed") {
+        filtered = tasks.filter(t => t.completed);
+      } else if (filter === "pending") {
+        filtered = tasks.filter(t => !t.completed);
+      }
+
+      filtered.forEach(task => {
+        const li = document.createElement("li");
+        li.className = task.priority + (task.completed ? " completed" : "");
+
+        const info = document.createElement("div");
+        info.className = "task-info";
+        info.innerHTML = `<strong>${task.text}</strong><br><span class="task-meta">Due: ${task.due || "No date"}</span>`;
+
+        li.appendChild(info);
+
+        li.addEventListener("click", () => {
+          task.completed = !task.completed;
+          saveTasks();
+        });
+
+        const delBtn = document.createElement("button");
+        delBtn.className = "delete-btn";
+        delBtn.innerHTML = "❌";
+        delBtn.onclick = (e) => {
+          e.stopPropagation();
+          tasks = tasks.filter(t => t.id !== task.id);
+          saveTasks();
+        };
+
+        li.appendChild(delBtn);
+        list.appendChild(li);
+      });
+
+      updateFilterBtns();
+    }
+
+    function saveTasks() {
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+      renderTasks();
+    }
+
+    function filterTasks(type) {
+      filter = type;
+      renderTasks();
+    }
+
+    function updateFilterBtns() {
+      document.querySelectorAll('.filters button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelector(`.filters button[onclick="filterTasks('${filter}')"]`).classList.add('active');
+    }
+
+    function clearAll() {
+      if (confirm("Are you sure you want to delete all tasks?")) {
+        tasks = [];
+        saveTasks();
+      }
+    }
+
+    renderTasks();
+  </script>
+</body>
+</html>
