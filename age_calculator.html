@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Advanced Age Calculator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #7ea2da, #2552b1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .age-box {
+      background: #ffffff;
+      padding: 30px 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    input[type="date"] {
+      padding: 10px;
+      font-size: 16px;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    button {
+      padding: 12px;
+      font-size: 16px;
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      background: #4facfe;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #00c6ff;
+    }
+
+    .result {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #222;
+    }
+
+    .birthday {
+      color: #e91e63;
+      font-weight: bold;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="age-box">
+  <h2>🎉 Unique Age Calculator</h2>
+  <input type="date" id="dob">
+  <button onclick="calculateAge()">Calculate Age</button>
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+  function calculateAge() {
+    const dobInput = document.getElementById("dob").value;
+    const result = document.getElementById("result");
+
+    if (!dobInput) {
+      result.innerHTML = "⛔ Please select your date of birth.";
+      return;
+    }
+
+    const dob = new Date(dobInput);
+    const today = new Date();
+
+    let years = today.getFullYear() - dob.getFullYear();
+    let months = today.getMonth() - dob.getMonth();
+    let days = today.getDate() - dob.getDate();
+
+    if (days < 0) {
+      months--;
+      days += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+    }
+
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+
+    const zodiac = getZodiacSign(dob.getDate(), dob.getMonth() + 1);
+    const isBirthday =
+      today.getDate() === dob.getDate() &&
+      today.getMonth() === dob.getMonth();
+
+    result.innerHTML = `
+      You are <strong>${years} years</strong>, <strong>${months} months</strong>, and <strong>${days} days</strong> old.<br>
+      🌟 Zodiac Sign: <strong>${zodiac}</strong><br>
+      ${isBirthday ? "<div class='birthday'>🎂 Happy Birthday!</div>" : ""}
+    `;
+  }
+
+  function getZodiacSign(day, month) {
+    const zodiacSigns = [
+      { sign: "Capricorn", from: [12, 22], to: [1, 19] },
+      { sign: "Aquarius", from: [1, 20], to: [2, 18] },
+      { sign: "Pisces", from: [2, 19], to: [3, 20] },
+      { sign: "Aries", from: [3, 21], to: [4, 19] },
+      { sign: "Taurus", from: [4, 20], to: [5, 20] },
+      { sign: "Gemini", from: [5, 21], to: [6, 20] },
+      { sign: "Cancer", from: [6, 21], to: [7, 22] },
+      { sign: "Leo", from: [7, 23], to: [8, 22] },
+      { sign: "Virgo", from: [8, 23], to: [9, 22] },
+      { sign: "Libra", from: [9, 23], to: [10, 22] },
+      { sign: "Scorpio", from: [10, 23], to: [11, 21] },
+      { sign: "Sagittarius", from: [11, 22], to: [12, 21] },
+    ];
+
+    for (const z of zodiacSigns) {
+      const [fromMonth, fromDay] = z.from;
+      const [toMonth, toDay] = z.to;
+
+      if (
+        (month === fromMonth && day >= fromDay) ||
+        (month === toMonth && day <= toDay)
+      ) {
+        return z.sign;
+      }
+    }
+
+    return "Unknown";
+  }
+</script>
+
+</body>
+</html>
